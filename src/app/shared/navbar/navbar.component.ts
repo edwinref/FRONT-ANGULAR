@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import { Router, NavigationEnd, NavigationStart } from '@angular/router';
 import { Location, PopStateEvent } from '@angular/common';
 
@@ -8,14 +8,18 @@ import { Location, PopStateEvent } from '@angular/common';
     styleUrls: ['./navbar.component.scss']
 })
 export class NavbarComponent implements OnInit {
-    public isCollapsed = true;
-    private lastPoppedUrl: string;
-    private yScrollStack: number[] = [];
 
     constructor(public location: Location, private router: Router) {
     }
 
+
+    public isCollapsed = true;
+    private lastPoppedUrl: string;
+    private yScrollStack: number[] = [];
+    condition: boolean;
+
     ngOnInit() {
+        this.isAdmin();
       this.router.events.subscribe((event) => {
         this.isCollapsed = true;
         if (event instanceof NavigationStart) {
@@ -51,6 +55,12 @@ export class NavbarComponent implements OnInit {
         }
         else {
             return false;
+        }
+    }
+
+    isAdmin() {
+        if ( sessionStorage.getItem('role') === 'admin') {
+            this.condition = true;
         }
     }
 }

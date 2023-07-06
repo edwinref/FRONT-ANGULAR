@@ -1,52 +1,452 @@
+<style>
+    .dtHorizontalExampleWrapper {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    #dtHorizontalExample th, td {
+        white-space: nowrap;
+    }
+
+    table.dataTable thead .sorting:after,
+    table.dataTable thead .sorting:before,
+    table.dataTable thead .sorting_asc:after,
+    table.dataTable thead .sorting_asc:before,
+    table.dataTable thead .sorting_asc_disabled:after,
+    table.dataTable thead .sorting_asc_disabled:before,
+    table.dataTable thead .sorting_desc:after,
+    table.dataTable thead .sorting_desc:before,
+    table.dataTable thead .sorting_desc_disabled:after,
+    table.dataTable thead .sorting_desc_disabled:before {
+        bottom: .5em;
+    }
+</style>
+<script>
+    $(document).ready(function () {
+        $('#dtHorizontalExample').DataTable({
+            "scrollX": true
+        });
+        $('.dataTables_length').addClass('bs-select');
+    });
+</script>
 <main>
-  <div class="position-relative">
-    <!-- Hero for FREE version -->
-    <section class="section section-lg section-hero section-shaped">
-      <!-- Background circles -->
-      <div class="shape shape-style-1 shape-primary">
-        <span class="span-150"></span>
-        <span class="span-50"></span>
-        <span class="span-50"></span>
-        <span class="span-75"></span>
-        <span class="span-100"></span>
-        <span class="span-75"></span>
-        <span class="span-50"></span>
-        <span class="span-100"></span>
-        <span class="span-50"></span>
-        <span class="span-100"></span>
-      </div>
-      <div class="container shape-container d-flex align-items-center py-lg">
-        <div class="col px-0">
-          <div class="row align-items-center justify-content-center">
-            <div class="col-lg-6 text-center">
-              <img src="./assets/img/brand/argon-white.png" style="width: 200px;" class="img-fluid">
-              <p class="lead text-white">A beautiful Design System for Bootstrap 4 and Angular 13. It's Free and Open Source.</p>
-              <div class="btn-wrapper mt-5">
-                <a href="https://www.creative-tim.com/product/argon-design-system-angular?ref=adsa-index-header" class="btn btn-lg btn-white btn-icon mb-3 mb-sm-0">
-                  <span class="btn-inner--icon"><i class="ni ni-cloud-download-95"></i></span>
-                  <span class="btn-inner--text">Download Angular</span>
-                </a>
-                <a href="https://github.com/creativetimofficial/argon-design-system-angular?ref=adsa-index-header" class="btn btn-lg btn-github btn-icon mb-3 mb-sm-0" target="_blank">
-                  <span class="btn-inner--icon"><i class="fa fa-github"></i></span>
-                  <span class="btn-inner--text">
-                    <span class="text-warning">Star us</span> on Github</span>
-                </a>
-              </div>
-              <div class="mt-5">
-                <small class="text-white font-weight-bold mb-0 mr-2">*proudly coded by</small>
-                <img src="./assets/img/brand/creativetim-white-slim.png" style="height: 28px;">
-              </div>
+    <div class="position-relative">
+        <!-- Hero for FREE version -->
+        <section class="section section-lg section-hero section-shaped">
+            <!-- Background circles -->
+            <div class="shape shape-style-1 shape-primary">
+                <span class="span-150"></span>
+                <span class="span-50"></span>
+                <span class="span-50"></span>
+                <span class="span-75"></span>
+                <span class="span-100"></span>
+                <span class="span-75"></span>
+                <span class="span-50"></span>
+                <span class="span-100"></span>
+                <span class="span-50"></span>
+                <span class="span-100"></span>
             </div>
-          </div>
-        </div>
-      </div>
-      <!-- SVG separator -->
-      <div class="separator separator-bottom separator-skew zindex-100">
-        <svg x="0" y="0" viewBox="0 0 2560 100" preserveAspectRatio="none" version="1.1" xmlns="http://www.w3.org/2000/svg">
-          <polygon class="fill-white" points="2560 0 2560 100 0 100"></polygon>
-        </svg>
-      </div>
-    </section>
-  </div>
-  <app-sections></app-sections>
+            <div class="container shape-container d-flex align-items-center py-lg">
+                <div class="col px-0">
+                    <div class="app-container">
+                        <div class="menu-bar">
+                            <div class="menu-item">
+                                <button class="btn btn-1 btn-success" (click)="onAddButtonClick()">Ajouter</button>
+                                <button class="btn btn-1 btn-danger" (click)="confirmTruncateTable()">Tronquer</button>
+                                <span class="close-button" (click)="onCloseFlowWindow()"><button class="btn btn-1 btn-warning" type="button">X</button>
+</span>
+
+                            </div>
+                        </div>
+                        <div *ngIf="isAddClicked  " class="flow-window">
+
+                        <div class="card">
+                            <div class="card-body">
+                                    <div class="form-container">
+                                        <div class="row">
+                                            <div class="row">
+                                                <div class="col-lg-3 col-sm-6">
+
+                                                    <div class="form-group">
+                                                        <label for="wording">Wording:</label>
+                                                        <input type="text" id="wording" placeholder=""
+                                                               [(ngModel)]="wording" class="form-control">
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label for="message_type">Message Type:</label>
+                                                        <input type="text" id="message_type" placeholder=""
+                                                               [(ngModel)]="message_type" maxlength="4" class="form-control">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="onl_de_003">Processing Code (003):</label>
+                                                        <select id="onl_de_003" [(ngModel)]="selectedDescription" class="custom-select">
+                                                            <option value="">-- Select a processing code --</option>
+                                                            <option *ngFor="let code of processingCodes"
+                                                                    [value]="code.description">{{ code.description }}</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="onl_de_004">Amount of Transaction (004):</label>
+                                                        <input type="text" id="onl_de_004" placeholder=""
+                                                               [(ngModel)]="onl_de_004" class="form-control">
+                                                        <div *ngIf="!isValidOnlDe004()"
+                                                             class="error-message">{{ errorMessage }}</div>
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label for="onl_de_007">Transmission date & time (007):</label>
+                                                        <input type="datetime-local" id="onl_de_007" placeholder=""
+                                                               [(ngModel)]="onl_de_007" step="1" class="form-control">
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label for="onl_de_011">System trace audit number (STAN)
+                                                            (011):</label>
+                                                        <input type="text" id="onl_de_011" placeholder=""
+                                                               [(ngModel)]="onl_de_011" maxlength="6" class="form-control">
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label for="onl_de_012">Local transaction time (012):</label>
+                                                        <input type="time" id="onl_de_012" placeholder=""
+                                                               [(ngModel)]="onl_de_012" step="1" class="form-control">
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label for="onl_de_013">Date de transaction locale (013)
+                                                            :</label>
+                                                        <input type="date" id="onl_de_013" placeholder=""
+                                                               (change)="parseDate()" [(ngModel)]="onl_de_013" class="form-control">
+                                                    </div>
+
+
+                                                    <div class="form-group">
+                                                        <label for="onl_de_035">Track 2 data (035):</label>
+                                                        <input type="text" id="onl_de_035" placeholder=""
+                                                               [(ngModel)]="onl_de_035" maxlength="19" class="form-control">
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-3 col-sm-6">
+
+                                                    <div class="form-group">
+                                                        <label for="onl_de_037">Retrieval reference number
+                                                            (037):</label>
+                                                        <input type="text" id="onl_de_037" placeholder=""
+                                                               [(ngModel)]="onl_de_037" maxlength="12" class="form-control">
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label for="onl_de_038">Authorization identification response
+                                                            (038):</label>
+                                                        <input type="text" id="onl_de_038" placeholder=""
+                                                               [(ngModel)]="onl_de_038" maxlength="6" class="form-control">
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label for="onl_de_041">Card acceptor terminal ID (041):</label>
+                                                        <input type="text" id="onl_de_041" placeholder=""
+                                                               [(ngModel)]="onl_de_041" class="form-control">
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label for="onl_de_042">Card acceptor identification code
+                                                            (outlet) (042):</label>
+                                                        <input type="text" id="onl_de_042" placeholder=""
+                                                               [(ngModel)]="onl_de_042" class="form-control">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="financial_constitution_id">financial_constitution_id
+                                                            :</label>
+                                                        <input type="text" id="financial_constitution_id" placeholder=""
+                                                               [(ngModel)]="financial_constitution_id" class="form-control">
+                                                    </div>
+
+
+                                                    <div class="form-group">
+                                                        <label for="logical_network">logical_network:</label>
+                                                        <input type="text" id="logical_network" placeholder=""
+                                                               [(ngModel)]="logical_network" class="form-control">
+                                                    </div>
+
+
+                                                    <div class="form-group">
+                                                        <label for="onl_de_125">Routing ID (125):</label>
+                                                        <input type="text" id="onl_de_125" placeholder=""
+                                                               [(ngModel)]="onl_de_125" (blur)="formatOnlDe125()"
+                                                               maxlength="10" class="form-control">
+                                                    </div>
+
+
+                                                    <div class="form-group">
+                                                        <label for="activity_flag">Activity_flag:</label>
+                                                        <input type="text" id="activity_flag" placeholder=""
+                                                               [(ngModel)]="activity_flag"
+                                                               [value]="defaultValues.activity_flag" class="form-control">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="send_count">Send_count:</label>
+                                                        <input type="text" id="send_count" placeholder=""
+                                                               [(ngModel)]="send_count"
+                                                               [value]="defaultValues.send_count" class="form-control">
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-3 col-sm-6">
+
+
+                                                    <div class="form-column">
+                                                        <label for="delay_time">Delay_time:</label>
+                                                        <input type="text" id="delay_time" placeholder=""
+                                                               [(ngModel)]="delay_time"
+                                                               [value]="defaultValues.delay_time" class="form-control">
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label for="chunk_delay">Chunk_delay:</label>
+                                                        <input type="text" id="chunk_delay" placeholder=""
+                                                               [(ngModel)]="chunk_delay"
+                                                               [value]="defaultValues.chunk_delay" class="form-control">
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label for="response_flag">Response_flag:</label>
+                                                        <input type="text" id="response_flag" placeholder=""
+                                                               [(ngModel)]="response_flag"
+                                                               [value]="defaultValues.response_flag" class="form-control">
+                                                    </div>
+
+
+                                                    <div class="form-group">
+                                                        <label for="reversal_flag">Reversal_flag:</label>
+                                                        <input type="text" id="reversal_flag" placeholder=""
+                                                               [(ngModel)]="reversal_flag"
+                                                               [value]="defaultValues.reversal_flag" class="form-control">
+
+                                                    </div>
+
+
+                                                    <div class="form-group">
+                                                        <label for="onl_de_018">Onl_de_018:</label>
+                                                        <input type="text" id="onl_de_018" placeholder=""
+                                                               [(ngModel)]="onl_de_018"
+                                                               [value]="defaultValues.onl_de_018" class="form-control">
+                                                    </div>
+
+
+                                                    <div class="form-group">
+                                                        <label for="onl_de_024">Onl_de_024:</label>
+                                                        <input type="text" id="onl_de_024" placeholder=""
+                                                               [(ngModel)]="onl_de_024"
+                                                               [value]="defaultValues.onl_de_024" class="form-control">
+                                                    </div>
+
+
+                                                    <div class="form-group">
+                                                        <label for="onl_de_027">Onl_de_027:</label>
+                                                        <input type="text" id="onl_de_027" placeholder=""
+                                                               [(ngModel)]="onl_de_027"
+                                                               [value]="defaultValues.onl_de_027" class="form-control">
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label for="onl_de_032">Onl_de_032:</label>
+                                                        <input type="text" id="onl_de_032" placeholder=""
+                                                               [(ngModel)]="onl_de_032"
+                                                               [value]="defaultValues.onl_de_032" class="form-control">
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label for="onl_de_039">Onl_de_039:</label>
+                                                        <input type="text" id="onl_de_039" placeholder=""
+                                                               [(ngModel)]="onl_de_039"
+                                                               [value]="defaultValues.onl_de_039" class="form-control">
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-3 col-sm-6">
+
+                                                    <div class="form-group">
+                                                        <label for="onl_de_043">Onl_de_043:</label>
+                                                        <input type="text" id="onl_de_043" placeholder=""
+                                                               [(ngModel)]="onl_de_043"
+                                                               [value]="defaultValues.onl_de_043" class="form-control">
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label for="onl_de_048">Onl_de_048:</label>
+                                                        <input type="text" id="onl_de_048" placeholder=""
+                                                               [(ngModel)]="onl_de_048"
+                                                               [value]="defaultValues.onl_de_048" class="form-control">
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label for="onl_de_049">Onl_de_049:</label>
+                                                        <input type="text" id="onl_de_049" placeholder=""
+                                                               [(ngModel)]="onl_de_049"
+                                                               [value]="defaultValues.onl_de_049" class="form-control">
+                                                    </div>
+
+
+                                                    <div class="form-group">
+                                                        <label for="onl_de_057">Onl_de_057:</label>
+                                                        <input type="text" id="onl_de_057" placeholder=""
+                                                               [(ngModel)]="onl_de_057"
+                                                               [value]="defaultValues.onl_de_057" class="form-control">
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label for="onl_de_061">Onl_de_061:</label>
+                                                        <input type="text" id="onl_de_061" placeholder=""
+                                                               [(ngModel)]="onl_de_061"
+                                                               [value]="defaultValues.onl_de_061" class="form-control">
+                                                    </div>
+
+
+                                                    <div class="form-group">
+                                                        <label for="onl_de_100">Onl_de_100:</label>
+                                                        <input type="text" id="onl_de_100" placeholder=""
+                                                               [(ngModel)]="onl_de_100"
+                                                               [value]="defaultValues.onl_de_100" class="form-control">
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label for="user_create">User_create:</label>
+                                                        <input type="text" id="user_create" placeholder=""
+                                                               [(ngModel)]="user_create"
+                                                               [value]="defaultValues.user_create" class="form-control">
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label for="user_modif">User_modif:</label>
+                                                        <input type="text" id="user_modif" placeholder=""
+                                                               [(ngModel)]="user_modif"
+                                                               [value]="defaultValues.user_modif" class="form-control">
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                            <div class="form-group button-group">
+                                                <button class="btn" (click)="onInsertButtonClick()">Insérer</button>
+                                            </div>
+
+
+                                        </div>
+                                        <div *ngIf="successMessage" class="success-message">
+                                            {{ successMessage }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                    <br>
+                    <br>
+                    <br>
+                    <div class="table-responsive">
+
+                            <table id="dtHorizontalExample" class="table table-striped table-bordered table-sm table-dark" cellspacing="0"
+                                   width="100%" *ngIf="bts.length > 0">
+                                <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">Seq</th>
+                                    <th scope="col">Env</th>
+                                    <th scope="col">Wording</th>
+                                    <th scope="col">message_type</th>
+                                    <th scope="col">ProcessCode</th>
+                                    <th scope="col">AmountTrans</th>
+                                    <th scope="col">TransDate&Time</th>
+                                    <th scope="col">STAN(onl_de_011)</th>
+                                    <th scope="col">LocalTransTime</th>
+                                    <th scope="col">LocalTransDate</th>
+                                    <th scope="col">Track2data</th>
+                                    <th scope="col">RetrievalRefNum</th>
+                                    <th scope="col">AuthIdRes</th>
+                                    <th scope="col">CardAcceptor terminalID</th>
+                                    <th scope="col">CardAcceptor IDcode (outlet)</th>
+                                    <th scope="col">onl_de_060</th>
+                                    <th scope="col">Routing ID</th>
+                                    <th scope="col">activity_flag</th>
+                                    <th scope="col">send_count</th>
+                                    <th scope="col">delay_time</th>
+                                    <th scope="col">chunk_delay</th>
+                                    <th scope="col">response_flag</th>
+                                    <th scope="col">reversal_flag</th>
+                                    <th scope="col">Merchant type</th>
+                                    <th scope="col">Function code</th>
+                                    <th scope="col">onl_de_027</th>
+                                    <th scope="col">Acquiring institution identification code</th>
+                                    <th scope="col">Response code</th>
+                                    <th scope="col">Card acceptor name/location</th>
+                                    <th scope="col">onl_de_048</th>
+                                    <th scope="col">Currency code</th>
+                                    <th scope="col">onl_de_057</th>
+                                    <th scope="col">onl_de_061</th>
+                                    <th scope="col">Receiving institution identification code</th>
+                                    <th scope="col">user_create</th>
+                                    <th scope="col">user_modif</th>
+
+
+                                    <!-- Add a new column for the delete button -->
+                                    <th scope="col">Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr *ngFor="let entry of bts">
+                                    <td>{{ entry.msg_seq }}</td>
+                                    <td>{{ entry.sim_env }}</td>
+                                    <td>{{ entry.wording }}</td>
+                                    <td>{{ message_type }}</td>
+                                    <td>{{ entry.onl_de_003 }}</td>
+                                    <td>{{ entry.onl_de_004 }}</td>
+                                    <td>{{ entry.onl_de_007 }}</td>
+                                    <td>{{ entry.onl_de_011 }}</td>
+                                    <td>{{ entry.onl_de_012 }}</td>
+                                    <td>{{ entry.onl_de_013 }}</td>
+                                    <td>{{ entry.onl_de_035 }}</td>
+                                    <td>{{ entry.onl_de_037 }}</td>
+                                    <td>{{ entry.onl_de_038 }}</td>
+                                    <td>{{ entry.onl_de_041 }}</td>
+                                    <td>{{ entry.onl_de_042 }}</td>
+                                    <td>{{ entry.onl_de_060 }}</td>
+                                    <td>{{ entry.onl_de_125 }}</td>
+                                    <td>{{ entry.activity_flag }}</td>
+                                    <td>{{ entry.send_count }}</td>
+                                    <td>{{ entry.delay_time }}</td>
+                                    <td>{{ entry.chunk_delay }}</td>
+                                    <td>{{ entry.response_flag }}</td>
+                                    <td>{{ entry.reversal_flag }}</td>
+                                    <td>{{ entry.onl_de_018 }}</td>
+                                    <td>{{ entry.onl_de_024 }}</td>
+                                    <td>{{ entry.onl_de_027 }}</td>
+                                    <td>{{ entry.onl_de_032 }}</td>
+                                    <td>{{ entry.onl_de_039 }}</td>
+                                    <td>{{ entry.onl_de_043 }}</td>
+                                    <td>{{ entry.onl_de_048 }}</td>
+                                    <td>{{ entry.onl_de_049 }}</td>
+                                    <td>{{ entry.onl_de_057 }}</td>
+                                    <td>{{ entry.onl_de_061 }}</td>
+                                    <td>{{ entry.onl_de_100 }}</td>
+                                    <td>{{ entry.user_create }}</td>
+                                    <td>{{ entry.user_modif }}</td>
+
+                                    <!-- Display the delete button in the new column -->
+                                    <td class="actions">
+                                        <button (click)="onDeleteBts(entry.msg_seq)" class="btn btn-icon btn-2 btn-danger">
+                                            <span class="btn-inner--icon">X</span>
+                                        </button>
+                                        <button (click)="onAddButtonClick()" class="btn btn-icon btn-2 btn-primary">
+                                            <span class="btn-inner--icon">Modifier</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </div>
 </main>

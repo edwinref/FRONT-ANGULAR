@@ -1,13 +1,14 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {CommonModule, DatePipe} from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { RouterModule } from '@angular/router';
+import { HttpClientModule } from '@angular/common/http';
 
 import { HomeComponent } from './home.component';
 
-import { SectionsModule } from '../sections/sections.module';
+import {BtsService} from './bts.service';
 
 @NgModule({
     imports: [
@@ -15,10 +16,11 @@ import { SectionsModule } from '../sections/sections.module';
         BrowserModule,
         FormsModule,
         RouterModule,
-        SectionsModule, NgbModule
+        NgbModule,
+        HttpClientModule
     ],
     declarations: [ HomeComponent ],
     exports:[ HomeComponent ],
-    providers: []
+    providers: [BtsService, DatePipe],
 })
 export class HomeModule { }

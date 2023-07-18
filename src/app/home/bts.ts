@@ -2,7 +2,7 @@ export interface Bts {
   msg_seq: string;
   sim_env: string;
   wording: string | null;
-  message_type: string | null;
+  message_type?: string;
   onl_de_004: string | null;
   onl_de_003?: string;
   onl_de_011: string | null;

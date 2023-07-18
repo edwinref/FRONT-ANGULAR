@@ -11,10 +11,12 @@ import { LandingComponent } from './landing/landing.component';
 import { HomeComponent } from './home/home.component';
 import { NavbarComponent } from './shared/navbar/navbar.component';
 import { FooterComponent } from './shared/footer/footer.component';
+import { AgGridModule } from 'ag-grid-angular';
 
 import { HomeModule } from './home/home.module';
 import { LoginComponent } from './login/login.component';
 import {LoginService} from './login/login.service';
+import {HttpClientModule} from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -31,9 +33,11 @@ import {LoginService} from './login/login.service';
     FormsModule,
     RouterModule,
     AppRoutingModule,
-    HomeModule
+    HomeModule,
+    HttpClientModule
   ],
   providers: [LoginService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
+

@@ -19,7 +19,7 @@ export class AppComponent implements OnInit {
 
     // tslint:disable-next-line:max-line-length
     constructor(private bnIdle: BnNgIdleService, private renderer : Renderer2, private router: Router, @Inject(DOCUMENT, ) private document: any, private element: ElementRef, public location: Location) {
-        this.bnIdle.startWatching(300).subscribe((res) => {
+        this.bnIdle.startWatching(10000).subscribe((res) => {
             if (res) {
 
                 console.log('session expired');

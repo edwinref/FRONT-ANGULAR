@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import {Bts} from './bts';
-import {ProcessingCode} from './processing-code';
+import {MessageType, ProcessingCode} from './processing-code';
 import {BtsService} from './bts.service';
 import {DatePipe} from '@angular/common';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
+import { saveAs } from 'file-saver';
 
 @Component({
     selector: 'app-home',
@@ -17,11 +18,15 @@ export class HomeComponent implements OnInit {
         middle: false,
         right: false
     };
+    selectedBts: Bts | null;
 
     focus;
     focus1;
+    public bts1;
     public bts: Bts[] = [];
     public processingCodes: ProcessingCode[] = [];
+    public message_type: MessageType[] = [];
+
     public onl_de_003 = '';
     public onl_de_011 = '';
     public onl_de_035 = '';
@@ -38,11 +43,12 @@ export class HomeComponent implements OnInit {
     public onl_de_007 = '';
     public financial_constitution_id = '';
     public logical_network = '';
-    public message_type = '';
     public errorMessage = '';
     public onl_de_004: any;
     selectedCode: { code: string, description: string } | undefined;
     public selectedDescription = '';
+    public selectedDescription1 = '';
+
     public isAddClicked = false;
     isAddOptionClicked = false;
     isTableVisible = false;
@@ -97,8 +103,10 @@ export class HomeComponent implements OnInit {
         this.isAddClicked = true;
     }
 
-    onAddButtonClick(): void {
+
+    onShow(): void {
         this.isAddClicked = true;
+
     }
 
 
@@ -119,10 +127,12 @@ export class HomeComponent implements OnInit {
     ngOnInit() {
         this.getBts();
         this.getProcessingCodes();
-        this.getDefaultValues(); // Call the method to fetch the default values
+        this.getDefaultValues();
+        this.getMessageType();
     }
 
     private getDefaultValues(): void {
+        console.log(this.btsService.getProcessingCodes());
         this.btsService.getDefaultValues().subscribe(
             (response: any) => {
                 this.defaultValues = response;
@@ -163,6 +173,18 @@ export class HomeComponent implements OnInit {
             (response: ProcessingCode[]) => {
                 this.processingCodes = response;
                 console.log(this.processingCodes);
+            },
+            (error: HttpErrorResponse) => {
+                alert(error.message);
+            }
+        );
+    }
+    public getMessageType(): void {
+        this.btsService.getMessageTypes().subscribe(
+            (response: ProcessingCode[]) => {
+                this.message_type = response;
+                console.log(this.message_type);
+
             },
             (error: HttpErrorResponse) => {
                 alert(error.message);
@@ -217,7 +239,6 @@ export class HomeComponent implements OnInit {
         if (this.onl_de_125 && this.onl_de_125.length >= 4) {
             const lastFourChars = this.onl_de_125.substr(2);
             const formattedValue = '000000' + lastFourChars;
-
             // Update the value in the database using your API or backend logic
             // Here, I'll just log the formatted value as an example
             console.log('Formatted Value:', formattedValue);
@@ -255,7 +276,13 @@ export class HomeComponent implements OnInit {
     }
 
 
-    public onInsertButtonClick(): void {
+    public onInsertButtonClick1(): void {
+        if (!this.wording || !this.message_type || !this.selectedDescription) {
+            // Check if the required inputs are empty
+            console.log('Error: Some required fields are empty');
+            alert('Error: Some required fields are empty');
+            return;
+        }
         if (this.onl_de_007) {
             const date = new Date(this.onl_de_007);
             const month = ('0' + (date.getMonth() + 1)).slice(-2);
@@ -267,16 +294,16 @@ export class HomeComponent implements OnInit {
             this.onl_de_007 = formattedDateTime;
         }
 
-
         const selectedDate = new Date(this.onl_de_013);
         const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
         const day = String(selectedDate.getDate()).padStart(2, '0');
         const formattedDate = month + day;
 
         // Appeler votre logique d'insertion en base de données ou votre API pour insérer la date formatée
-        this.onl_de_013 = this.formattedDate;
+        this.onl_de_013 = formattedDate;
 
         const selectedCode = this.processingCodes.find((code) => code.description === this.selectedDescription)?.code;
+        const selectedCode1 = this.message_type.find((code) => code.description === this.selectedDescription1)?.code;
 
         const insertedValue = this.onl_de_035.trim();
 
@@ -313,7 +340,7 @@ export class HomeComponent implements OnInit {
         }
 
         if (this.onl_de_041 && this.onl_de_041.trim() !== '') {
-            this.onl_de_041 = this.onl_de_041.toString().padStart(16, '');
+            this.onl_de_041 = this.completeWithSpaces(this.onl_de_041);
         }
 
         const data: Bts = {
@@ -332,7 +359,7 @@ export class HomeComponent implements OnInit {
             onl_de_012: this.onl_de_012.trim() !== '' ? this.onl_de_012.replace(/:/g, '') : null,
             onl_de_013: this.onl_de_013.trim() !== '' ? this.onl_de_013 : null,
             onl_de_007: this.onl_de_007.trim() !== '' ? this.onl_de_007 : null,
-            message_type: this.message_type.trim() !== '' ? this.message_type : null,
+            message_type: selectedCode1,
             wording: this.wording.trim() !== '' ? this.wording : null,
             logical_network: this.logical_network.trim() !== '' ? this.logical_network : null,
             financial_constitution_id: this.financial_constitution_id.trim() !== '' ? this.financial_constitution_id : null,
@@ -356,13 +383,11 @@ export class HomeComponent implements OnInit {
             user_create: this.user_create.trim() !== '' ? this.user_create : null,
             user_modif: this.user_modif.trim() !== '' ? this.user_modif : null,
         };
-
-
-
+        console.log(data);
         this.btsService.addBts(data).subscribe(
             (response: Bts) => {
                 console.log('Data inserted successfully:', response);
-                this.successMessage = 'l enregistremet a été ajouté avec succés ';
+                this.successMessage = 'l enregistremet a été ajouté avec succès';
                 this.clearFields();
                 setTimeout(() => {
                     this.successMessage = '';
@@ -387,6 +412,19 @@ export class HomeComponent implements OnInit {
         }
     }
 
+    public completeWithSpaces(onl_de_041: string): string {
+        const maxLength = 16;
+
+        if (onl_de_041.length >= maxLength) {
+            return onl_de_041; // Si la longueur est déjà de 16 caractères ou plus, renvoyer la valeur inchangée.
+        }
+
+        const spacesToAdd = maxLength - onl_de_041.length;
+        const spaces = ' '.repeat(spacesToAdd);
+        const completedValue = onl_de_041 + spaces;
+
+        return completedValue;
+    }
 
 
     private generateNextMsgSeq(): string {
@@ -403,6 +441,40 @@ export class HomeComponent implements OnInit {
             return '1';
         }
     }
+    onAddButtonClickSQL(msg_seq: string): void {
+        this.btsService.getBtsByMsgSeq(msg_seq).subscribe(
+            (response: Bts) => { // Change the parameter type to 'Bts'
+                let blob;
+                if (response) { // Check if a response is received
+                    const data: Bts = response;
+                    const insertSQL = `INSERT INTO pwr_cert_messages (msg_seq, sim_env, onl_de_004, onl_de_003, onl_de_011, onl_de_035,onl_de_037, onl_de_038, onl_de_041, onl_de_042, onl_de_060,onl_de_125, onl_de_012, onl_de_013, onl_de_007, message_type, wording,logical_network, financial_constitution_id, activity_flag, send_count,delay_time, chunk_delay, response_flag, reversal_flag, onl_de_018,onl_de_024, onl_de_027, onl_de_032, onl_de_039, onl_de_043,onl_de_048, onl_de_049, onl_de_057, onl_de_061, onl_de_100, user_create, user_modif)
+                                           VALUES ('${data.msg_seq}', '${data.sim_env}', '${data.onl_de_004}', '${data.onl_de_003}',
+                                                   '${data.onl_de_011}', '${data.onl_de_035}', '${data.onl_de_037}', '${data.onl_de_038}',
+                                                   '${data.onl_de_041}', '${data.onl_de_042}', '${data.onl_de_060}', '${data.onl_de_125}',
+                                                   '${data.onl_de_012}', '${data.onl_de_013}', '${data.onl_de_007}', '${data.message_type}',
+                                                   '${data.wording}', '${data.logical_network}', '${data.financial_constitution_id}',
+                                                   '${data.activity_flag}', ${data.send_count}, ${data.delay_time}, ${data.chunk_delay},
+                                                   '${data.response_flag}', '${data.reversal_flag}', '${data.onl_de_018}', '${data.onl_de_024}',
+                                                   '${data.onl_de_027}', '${data.onl_de_032}', '${data.onl_de_039}', '${data.onl_de_043}',
+                                                   '${data.onl_de_048}', '${data.onl_de_049}', '${data.onl_de_057}', '${data.onl_de_061}',
+                                                   '${data.onl_de_100}', '${data.user_create}', '${data.user_modif}');`;
+                    console.log('SQL Insert Statement:');
+                    console.log(insertSQL);
+                    blob = new Blob([insertSQL], {
+                        type: 'text/plain;charset=utf-8',
+                    });
+                    saveAs(blob, response.msg_seq + '.sql');
+                } else {
+                    console.log('No data found for the given msg_seq.');
+                }
+            },
+            (error: HttpErrorResponse) => {
+                console.error('Error retrieving data:', error);
+                // Handle the error or show an error message
+            }
+        );
+    }
+
 
     public onDeleteBts(msg_seq: string): void {
         const confirmation = confirm('Voulez-vous vraiment supprimer cet enregistrement?');
@@ -446,7 +518,6 @@ export class HomeComponent implements OnInit {
         this.wording = '';
         this.financial_constitution_id = '';
         this.logical_network = '';
-        this.message_type = '';
         this.activity_flag = this.defaultValues.activity_flag;
         this.send_count = this.defaultValues.send_count;
         this.delay_time =  this.defaultValues.delay_time;
@@ -469,6 +540,7 @@ export class HomeComponent implements OnInit {
         this.user_modif = this.defaultValues.user_modif;
         this.formattedDate = '';
         this.selectedDescription = '';
+        this.selectedDescription1 = '';
 
     }
 
@@ -476,4 +548,192 @@ export class HomeComponent implements OnInit {
         const onlDe004Number = Number(this.onl_de_004);
         return !isNaN(onlDe004Number);
     }
+    public isValidOnlDe041(): boolean {
+        const onlDe004Number = Number(this.onl_de_004);
+        return !isNaN(onlDe004Number);
+    }
+
+    onClick() {
+        this.btsService.getBts().subscribe(
+            (response: Bts[]) => {
+                console.log(response.length);
+                const insertSQL = `INSERT INTO pwr_cert_messages (msg_seq, sim_env, onl_de_004, onl_de_003, onl_de_011, onl_de_035,
+                                                                                            onl_de_037, onl_de_038, onl_de_041, onl_de_042, onl_de_060,
+                                                                                            onl_de_125, onl_de_012, onl_de_013, onl_de_007, message_type, wording,
+                                                                                            logical_network, financial_constitution_id, activity_flag, send_count,
+                                                                                            delay_time, chunk_delay, response_flag, reversal_flag, onl_de_018,
+                                                                                            onl_de_024, onl_de_027, onl_de_032, onl_de_039, onl_de_043,
+                                                                                            onl_de_048, onl_de_049, onl_de_057, onl_de_061, onl_de_100,
+                                                                                            user_create, user_modif) VALUES `;
+                let blob;
+                if (response.length > 0) {
+                    const values = response
+                        .map((data: Bts) => {
+                            return `('${data.msg_seq}', '${data.sim_env}', '${data.onl_de_004}', '${data.onl_de_003}',
+                                    '${data.onl_de_011}', '${data.onl_de_035}', '${data.onl_de_037}', '${data.onl_de_038}',
+                                    '${data.onl_de_041}', '${data.onl_de_042}', '${data.onl_de_060}', '${data.onl_de_125}',
+                                    '${data.onl_de_012}', '${data.onl_de_013}', '${data.onl_de_007}', '${data.message_type}',
+                                    '${data.wording}', '${data.logical_network}', '${data.financial_constitution_id}',
+                                    '${data.activity_flag}', ${data.send_count}, ${data.delay_time}, ${data.chunk_delay},
+                                    '${data.response_flag}', '${data.reversal_flag}', '${data.onl_de_018}', '${data.onl_de_024}',
+                                    '${data.onl_de_027}', '${data.onl_de_032}', '${data.onl_de_039}', '${data.onl_de_043}',
+                                    '${data.onl_de_048}', '${data.onl_de_049}', '${data.onl_de_057}', '${data.onl_de_061}',
+                                    '${data.onl_de_100}', '${data.user_create}', '${data.user_modif}')`;
+                                        })
+                        .join(', ');
+
+                    const insertSQLWithValues = insertSQL + values;
+                    console.log('SQL Insert Statement:');
+                    console.log(insertSQLWithValues);
+                    blob = new Blob([insertSQLWithValues], {
+                        type: 'text/plain;charset=utf-8',
+                    });
+                    saveAs(blob, 'result.sql');
+                } else {
+                    console.log('No data found for the given msg_seq.');
+                }
+            },
+            (error: HttpErrorResponse) => {
+                console.error('Error retrieving data:', error);
+                // Handle the error or show an error message
+            }
+        );
+    }
+    onAddButtonClick(bts: Bts): void {
+        this.selectedBts = { ...bts };
+        // Populate the form fields with the selectedBts values
+        this.wording = this.selectedBts.wording;
+        this.selectedDescription1 = this.selectedBts.message_type;
+        this.selectedDescription = this.selectedBts.onl_de_003;
+        this.onl_de_004 = this.selectedBts.onl_de_004;
+        this.onl_de_007 = this.selectedBts.onl_de_007;
+        this.onl_de_011 = this.selectedBts.onl_de_011;
+        this.onl_de_012 = this.selectedBts.onl_de_012;
+        this.onl_de_013 = this.selectedBts.onl_de_013;
+        this.onl_de_035 = this.selectedBts.onl_de_035;
+        this.onl_de_037 = this.selectedBts.onl_de_037;
+        this.onl_de_038 = this.selectedBts.onl_de_038;
+        this.onl_de_041 = this.selectedBts.onl_de_041;
+        this.onl_de_042 = this.selectedBts.onl_de_042;
+        this.financial_constitution_id = this.selectedBts.financial_constitution_id;
+        this.logical_network = this.selectedBts.logical_network;
+        this.onl_de_125 = this.selectedBts.onl_de_125;
+        this.activity_flag = this.selectedBts.activity_flag;
+        this.send_count = this.selectedBts.send_count;
+        this.delay_time = this.selectedBts.delay_time;
+        this.chunk_delay = this.selectedBts.chunk_delay;
+        this.response_flag = this.selectedBts.response_flag;
+        this.reversal_flag = this.selectedBts.reversal_flag;
+        this.onl_de_018 = this.selectedBts.onl_de_018;
+        this.onl_de_024 = this.selectedBts.onl_de_024;
+        this.onl_de_027 = this.selectedBts.onl_de_027;
+        this.onl_de_032 = this.selectedBts.onl_de_032;
+        this.onl_de_039 = this.selectedBts.onl_de_039;
+        this.onl_de_043 = this.selectedBts.onl_de_043;
+        this.onl_de_048 = this.selectedBts.onl_de_048;
+        this.onl_de_049 = this.selectedBts.onl_de_049;
+        this.onl_de_057 = this.selectedBts.onl_de_057;
+        this.onl_de_061 = this.selectedBts.onl_de_061;
+        this.onl_de_100 = this.selectedBts.onl_de_100;
+        this.user_create = this.selectedBts.user_create;
+        this.user_modif = this.selectedBts.user_modif;
+    }
+
+    onInsertButtonClick(): void {
+        if (this.selectedBts) {
+            // Update the selectedBts object with the form field values
+            this.selectedBts.wording = this.wording;
+            this.selectedBts.message_type = this.selectedDescription1;
+            this.selectedBts.onl_de_003 = this.selectedDescription;
+            this.selectedBts.onl_de_004 = this.onl_de_004;
+            this.selectedBts.onl_de_007 = this.onl_de_007;
+            this.selectedBts.onl_de_011 = this.onl_de_011;
+            this.selectedBts.onl_de_012 = this.onl_de_012;
+            this.selectedBts.onl_de_013 = this.onl_de_013;
+            this.selectedBts.onl_de_035 = this.onl_de_035;
+            this.selectedBts.onl_de_037 = this.onl_de_037;
+            this.selectedBts.onl_de_038 = this.onl_de_038;
+            this.selectedBts.onl_de_041 = this.onl_de_041;
+            this.selectedBts.onl_de_042 = this.onl_de_042;
+            this.selectedBts.financial_constitution_id = this.financial_constitution_id;
+            this.selectedBts.logical_network = this.logical_network;
+            this.selectedBts.onl_de_125 = this.onl_de_125;
+            this.selectedBts.activity_flag = this.activity_flag;
+            this.selectedBts.send_count = this.send_count;
+            this.selectedBts.delay_time = this.delay_time;
+            this.selectedBts.chunk_delay = this.chunk_delay;
+            this.selectedBts.response_flag = this.response_flag;
+            this.selectedBts.reversal_flag = this.reversal_flag;
+            this.selectedBts.onl_de_018 = this.onl_de_018;
+            this.selectedBts.onl_de_024 = this.onl_de_024;
+            this.selectedBts.onl_de_027 = this.onl_de_027;
+            this.selectedBts.onl_de_032 = this.onl_de_032;
+            this.selectedBts.onl_de_039 = this.onl_de_039;
+            this.selectedBts.onl_de_043 = this.onl_de_043;
+            this.selectedBts.onl_de_048 = this.onl_de_048;
+            this.selectedBts.onl_de_049 = this.onl_de_049;
+            this.selectedBts.onl_de_057 = this.onl_de_057;
+            this.selectedBts.onl_de_061 = this.onl_de_061;
+            this.selectedBts.onl_de_100 = this.onl_de_100;
+            this.selectedBts.user_create = this.user_create;
+            this.selectedBts.user_modif = this.user_modif;
+
+            // Call the updateBts method to update the selectedBts object on the server
+            this.btsService.updateBts(this.selectedBts).subscribe(
+                (updatedBts: Bts) => {
+                    // Success: Update the corresponding Bts object in the bts array
+                    const index = this.bts.findIndex(entry => entry.msg_seq === updatedBts.msg_seq);
+                    if (index !== -1) {
+                        this.bts[index] = updatedBts;
+                    }
+                    // Reset the form fields
+                    this.wording = '';
+                    this.selectedDescription1 = '';
+                    this.selectedDescription = '';
+                    this.onl_de_004 = '';
+                    this.onl_de_007 = '';
+                    this.onl_de_011 = '';
+                    this.onl_de_012 = '';
+                    this.onl_de_013 = '';
+                    this.onl_de_035 = '';
+                    this.onl_de_037 = '';
+                    this.onl_de_038 = '';
+                    this.onl_de_041 = '';
+                    this.onl_de_042 = '';
+                    this.financial_constitution_id = '';
+                    this.logical_network = '';
+                    this.onl_de_125 = '';
+                    this.activity_flag = '';
+                    this.activity_flag = '';
+                    this.send_count = null;
+                    this.delay_time = null;
+                    this.chunk_delay = null;
+                    this.response_flag = '';
+                    this.reversal_flag = '';
+                    this.onl_de_018 = '';
+                    this.onl_de_024 = '';
+                    this.onl_de_027 = '';
+                    this.onl_de_032 = '';
+                    this.onl_de_039 = '';
+                    this.onl_de_043 = '';
+                    this.onl_de_048 = '';
+                    this.onl_de_049 = '';
+                    this.onl_de_057 = '';
+                    this.onl_de_061 = '';
+                    this.onl_de_100 = '';
+                    this.user_create = '';
+                    this.user_modif = '';
+
+                    // Clear the selectedBts property
+                    this.selectedBts = null;
+                },
+                (error: any) => {
+                    // Handle the error
+                    console.error(error);
+                }
+            );
+        }
+    }
+
+
 }

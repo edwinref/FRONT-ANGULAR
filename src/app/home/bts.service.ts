@@ -15,6 +15,10 @@ export class BtsService {
   public getProcessingCodes(): Observable<{ code: string, description: string }[]> {
   return this.http.get<{ code: string, description: string }[]>('http://localhost:8080/bts/processingcodes');
 }
+  public getMessageTypes(): Observable<{ code: string, description: string }[]> {
+    return this.http.get<{ code: string, description: string }[]>('http://localhost:8080/bts/messagetype');
+  }
+
 
 
 public getBts(): Observable<Bts[]> {
@@ -27,6 +31,9 @@ public getBts(): Observable<Bts[]> {
 
   return this.http.get<Bts[]>(url, { headers });
 }
+  public getBtsByMsgSeq(msg_seq: string): Observable<Bts> {
+    return this.http.get<Bts>(`${this.apiServerUrl}/bts/${msg_seq}`);
+  }
 
   public addBts(bts: Bts): Observable<Bts> {
     return this.http.post<Bts>(`${this.apiServerUrl}/bts/add`, bts);
@@ -52,6 +59,8 @@ public getBts(): Observable<Bts[]> {
   getDefaultValues(): Observable<void> {
     return this.http.get<void>(`${this.apiServerUrl}/bts/default_values`);
   }
-
+  getProcessingCode(): Observable<void> {
+    return this.http.get<void>(`${this.apiServerUrl}/bts/processiongcode`);
+  }
 
 }
